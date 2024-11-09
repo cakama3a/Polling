@@ -1,5 +1,5 @@
 # Current version of the program
-ver = "1.1.9"
+ver = "1.1.91"
 
 # Required libraries import
 from colorama import Fore, Style
@@ -76,25 +76,29 @@ while True:
         time.sleep(10)
         exit(1)
     else:
-        print(f" ")
         print(f"Found {len(joysticks)} controller(s)")
 
         # List all connected controllers
         for idx, joystick in enumerate(joysticks):
             print(f"{idx + 1}. {joystick.get_name()}")
 
-        # Controller selection
-        selected_index = input("Please enter the index of the controller you want to test: ")
-        try:
-            selected_index = int(selected_index) - 1
-            if 0 <= selected_index < len(joysticks):
-                joystick = joysticks[selected_index]
-            else:
-                print("Invalid index. Defaulting to the first controller.")
-                joystick = joysticks[0]
-        except ValueError:
-            print("Invalid input. Defaulting to the first controller.")
+        # Automatic selection if only one controller is connected
+        if len(joysticks) == 1:
             joystick = joysticks[0]
+            print("Only one controller detected. Automatically selected.")
+        else:
+            # Controller selection for multiple controllers
+            selected_index = input("Please enter the index of the controller you want to test: ")
+            try:
+                selected_index = int(selected_index) - 1
+                if 0 <= selected_index < len(joysticks):
+                    joystick = joysticks[selected_index]
+                else:
+                    print("Invalid index. Defaulting to the first controller.")
+                    joystick = joysticks[0]
+            except ValueError:
+                print("Invalid input. Defaulting to the first controller.")
+                joystick = joysticks[0]
 
         # Initialize selected controller
         joystick.init()
