@@ -1,5 +1,5 @@
 # Current version of the program
-ver = "1.1.92"
+ver = "1.1.93"
 
 # Required libraries import
 from colorama import Fore, Style
@@ -61,6 +61,8 @@ def get_polling_rate_max(actual_rate):
         max_rate = 4000
     if actual_rate > 4200:
         max_rate = 8000
+    if actual_rate > 8200:
+        max_rate = 10000
     return max_rate
 
 # Main program loop

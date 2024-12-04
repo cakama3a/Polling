@@ -4,3 +4,8 @@ Gamepadla.spec
 .Gamepadla.spec
 data.txt
 diagnostic_data.json
+mycert.pem
+mycert.pfx
+mykey.pem
+dist/Polling.exe
+dist/Polling.exe
