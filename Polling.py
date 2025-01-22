@@ -1,5 +1,5 @@
 # Current version of the program
-ver = "1.1.93"
+ver = "1.2.0.0"
 
 # Required libraries import
 from colorama import Fore, Style
@@ -22,8 +22,8 @@ print("   ██████╔╝██║   ██║██║     ██║  
 print("   ██╔═══╝ ██║   ██║██║     ██║     ██║██║╚██╗██║" + Fore.CYAN + "██║   ██║" + Fore.RESET + "")
 print("   ██║     ╚██████╔╝███████╗███████╗██║██║ ╚████║" + Fore.CYAN + "╚██████╔╝" + Fore.RESET + "")
 print("   ╚═╝      ╚═════╝ ╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝" + Fore.CYAN + " ╚═════╝ " + Fore.RESET + "")
-print(f"   " + Fore.CYAN + "Polling Rate Tester " + Fore.RESET + ver + "       https://gamepadla.com")
-print(f"   Support the project:            https://ko-fi.com/gamepadla")
+print(f"   " + Fore.CYAN + "Polling Rate Tester " + Fore.RESET + ver + "      https://gamepadla.com")
+print(f"   Support the project:             https://ko-fi.com/gamepadla")
 print(f" ")
 print(f" ")
 pygame.init()
