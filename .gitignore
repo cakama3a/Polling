@@ -1,4 +1,3 @@
-
 /build
 Gamepadla.spec
 .Gamepadla.spec
@@ -9,3 +8,5 @@ mycert.pfx
 mykey.pem
 dist/Polling.exe
 dist/Polling.exe
+/env
+

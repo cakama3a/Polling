@@ -250,7 +250,7 @@ while True:
 
         # Handle web result viewing
         print("")
-        if input("Open in browser? (Y/N): ").lower() == "y":
+        if input("Would you like to send this data to the gamepadla.com database? (Y/N): ").lower() == "y":
             gamepad_name = input("Please enter the name of your gamepad: ")
             connection = input("Please select connection type (1. Cable, 2. Bluetooth, 3. Dongle): ")
             if connection == "1":
