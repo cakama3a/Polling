@@ -47,3 +47,12 @@ source env/bin/activate
 pip install -r requirements.txt
 python Polling.py
 ```
+
+On Linux, you can also use `make` to install/update the requirement and run the project:
+```bash
+# install or update requirements only:
+make requirements
+
+# installs or updates the requirements and runs the project:
+make run
+```
