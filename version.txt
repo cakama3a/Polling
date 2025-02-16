@@ -1,0 +1,30 @@
+VSVersionInfo(
+  ffi=FixedFileInfo(
+    filevers=(1, 2, 0, 1),
+    prodvers=(1, 2, 0, 1),
+    mask=0x3f,
+    flags=0x0,
+    OS=0x40004,
+    fileType=0x1,
+    subtype=0x0,
+    date=(0, 0)
+  ),
+  kids=[
+    StringFileInfo([
+      StringTable(
+        u'040904B0',
+        [
+          StringStruct(u'CompanyName', u'GamepadLA'),
+          StringStruct(u'FileDescription', u'Polling Rate Tester for Game Controllers'),
+          StringStruct(u'FileVersion', u'1.2.0.1'),
+          StringStruct(u'InternalName', u'polling'),
+          StringStruct(u'LegalCopyright', u'Copyright © 2024 GamepadLA'),
+          StringStruct(u'OriginalFilename', u'polling.exe'),
+          StringStruct(u'ProductName', u'GamepadLA Polling Rate Tester'),
+          StringStruct(u'ProductVersion', u'1.2.0.1'),
+          StringStruct(u'Comments', u'Tool for testing gamepad polling rate')
+        ]
+      )
+    ])
+  ]
+)

@@ -1,5 +1,5 @@
 # Current version of the program
-ver = "1.2.0.0"
+ver = "1.2.0.1"
 
 # Required libraries import
 from colorama import Fore, Style
