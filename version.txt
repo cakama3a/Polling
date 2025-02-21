@@ -17,14 +17,19 @@ VSVersionInfo(
           StringStruct(u'CompanyName', u'GamepadLA'),
           StringStruct(u'FileDescription', u'Polling Rate Tester for Game Controllers'),
           StringStruct(u'FileVersion', u'1.2.0.1'),
-          StringStruct(u'InternalName', u'polling'),
-          StringStruct(u'LegalCopyright', u'Copyright © 2024 GamepadLA'),
-          StringStruct(u'OriginalFilename', u'polling.exe'),
+          StringStruct(u'InternalName', u'Polling'),
+          StringStruct(u'LegalCopyright', u'Copyright © 2025 John Punch'),
+          StringStruct(u'OriginalFilename', u'Polling.exe'),
           StringStruct(u'ProductName', u'GamepadLA Polling Rate Tester'),
           StringStruct(u'ProductVersion', u'1.2.0.1'),
-          StringStruct(u'Comments', u'Tool for testing gamepad polling rate')
+          StringStruct(u'Comments', u'Tool for testing gamepad polling rate'),
+          StringStruct(u'Author', u'John Punch'),
+          StringStruct(u'Website', u'https://gamepadla.com')
         ]
       )
+    ]),
+    VarFileInfo([
+      VarStruct(u'Translation', [1033, 1200])
     ])
   ]
 )
