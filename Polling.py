@@ -69,7 +69,14 @@ def get_polling_rate_max(actual_rate):
 while True:
     # Initialize joystick subsystem
     pygame.joystick.init()
-    joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
+    joysticks = []
+    try:
+        joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
+    except pygame.error as e:
+        print(f"Error initializing controller: {e}")
+        print("Please try reconnecting your controller or restart the program.")
+        time.sleep(10)
+        exit(1)
     delay_list = []
 
     # Check for connected controllers
