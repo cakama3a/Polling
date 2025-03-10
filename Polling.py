@@ -1,5 +1,5 @@
 # Current version of the program
-ver = "1.2.0.1"
+ver = "1.2.0.2"
 
 # Required libraries import
 from colorama import Fore, Style
@@ -10,6 +10,8 @@ import platform
 import requests
 import uuid
 import webbrowser
+import random
+import string
 import pygame
 print("Based on the method of: https://github.com/chrizonix/XInputTest")
 
@@ -42,6 +44,11 @@ def filter_outliers(array):
 
     # Return filtered array without outliers
     return sorted_array[lower_index:upper_index + 1]
+
+# Short ID Generation
+def generate_short_id(length=12):
+    characters = string.ascii_letters + string.digits
+    return ''.join(random.choice(characters) for _ in range(length))
 
 # Function to determine the maximum theoretical polling rate
 # based on the measured actual rate
@@ -232,7 +239,7 @@ while True:
         print(f"Jitter:             {jitter:.2f} ms")
 
         # Generate unique test identifier
-        test_key = uuid.uuid4()
+        test_key = generate_short_id()
         # Prepare data for storage and transmission
         data = {
             'test_key': str(test_key),
