@@ -10,3 +10,6 @@ dist/Polling.exe
 dist/Polling.exe
 /env
 
+PollingCert.pfx
+build.bat
+Polling.spec

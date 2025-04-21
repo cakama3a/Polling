@@ -2,14 +2,14 @@
 
 
 a = Analysis(
-    ['Polling.py'],
+    ['C:\\Users\\cakam\\Documents\\GitHub\\Polling\\Python.py'],
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=['pygame', 'numpy'],
+    hiddenimports=['matplotlib.backends.backend_tkagg'],
     hookspath=[],
     hooksconfig={},
-    runtime_hooks=[],
+    runtime_hooks=['C:\\Users\\cakam\\AppData\\Local\\Temp\\PollingBuild_14346\\hook-matplotlib.py'],
     excludes=[],
     noarchive=False,
     optimize=0,
@@ -26,7 +26,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=False,
+    upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=True,
@@ -35,6 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    version='version.txt',
-    icon=['icon.ico'],
+    icon=['C:\\Users\\cakam\\Documents\\GitHub\\Polling\\icon.ico'],
 )
