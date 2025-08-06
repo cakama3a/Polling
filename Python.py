@@ -13,6 +13,7 @@ import webbrowser
 import random
 import string
 import pygame
+
 print("Based on the method of: https://github.com/chrizonix/XInputTest")
 
 # Print introductory information
@@ -175,6 +176,35 @@ while True:
         prev_x, prev_y = None, None
         measurements_count = 0
 
+        # ---- Новий код для адаптивного кольорового виводу ----
+        initial_measurements = []
+        initial_measurements_count = 100  # Кількість вимірювань для встановлення порогу
+        print("Збір початкових даних для адаптації...")
+        
+        while len(initial_measurements) < initial_measurements_count:
+            pygame.event.pump()
+            x = joystick.get_axis(axis_x)
+            y = joystick.get_axis(axis_y)
+            pygame.event.clear()
+
+            if not ("0.0" in str(x) and "0.0" in str(y)):
+                if prev_x is None and prev_y is None:
+                    prev_x, prev_y = x, y
+                    prev_time = time.perf_counter_ns()
+                elif x != prev_x or y != prev_y:
+                    end_time = time.perf_counter_ns()
+                    delay = round((end_time - prev_time) / 1_000_000, 3)
+                    prev_time = end_time
+                    prev_x, prev_y = x, y
+
+                    if 0.1 < delay < 150:
+                        initial_measurements.append(delay)
+        
+        mean_delay = np.mean(initial_measurements)
+        std_dev = np.std(initial_measurements)
+        print(f"Початкове середнє значення затримки: {mean_delay:.2f} мс")
+        print(f"Початкове стандартне відхилення: {std_dev:.2f} мс")
+        
         print("")  # Add empty line before measurements start
 
         # Main measurement loop
@@ -202,12 +232,21 @@ while True:
                         times.append(delay)
                         measurements_count += 1
                         progress_percentage = (measurements_count / repeat) * 100
-                        print(f"[{progress_percentage:3.0f}%] {delay:.2f} ms")
+
+                        # Визначення кольору на основі адаптивних порогів
+                        color = Fore.RESET
+                        if delay > mean_delay + (std_dev * 2):
+                            color = Fore.YELLOW
+                        if delay > mean_delay + (std_dev * 5) or delay > 10:
+                            color = Fore.RED
+
+                        print(f"[{progress_percentage:3.0f}%] {color}{delay:.2f} ms{Style.RESET_ALL}")
                         delay_list.append(delay)
 
                 # Check if we have enough measurements
                 if len(times) >= repeat:
                     break
+        # -------------------- Кінець нового коду --------------------
 
         # Store raw data before filtering
         delay_clear = delay_list
