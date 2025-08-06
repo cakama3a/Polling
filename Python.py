@@ -1,5 +1,5 @@
 # Current version of the program
-ver = "1.2.0.2"
+ver = "1.3.0.0"
 
 # Required libraries import
 from colorama import Fore, Style
@@ -176,10 +176,10 @@ while True:
         prev_x, prev_y = None, None
         measurements_count = 0
 
-        # ---- Новий код для адаптивного кольорового виводу ----
+        # ---- New code for adaptive color output ----
         initial_measurements = []
-        initial_measurements_count = 100  # Кількість вимірювань для встановлення порогу
-        print("Збір початкових даних для адаптації...")
+        initial_measurements_count = 100  # Number of measurements to establish the threshold
+        print("Collecting initial data for adaptation...")
         
         while len(initial_measurements) < initial_measurements_count:
             pygame.event.pump()
@@ -202,8 +202,8 @@ while True:
         
         mean_delay = np.mean(initial_measurements)
         std_dev = np.std(initial_measurements)
-        print(f"Початкове середнє значення затримки: {mean_delay:.2f} мс")
-        print(f"Початкове стандартне відхилення: {std_dev:.2f} мс")
+        print(f"Initial average delay: {mean_delay:.2f} ms")
+        print(f"Initial standard deviation: {std_dev:.2f} ms")
         
         print("")  # Add empty line before measurements start
 
@@ -233,7 +233,7 @@ while True:
                         measurements_count += 1
                         progress_percentage = (measurements_count / repeat) * 100
 
-                        # Визначення кольору на основі адаптивних порогів
+                        # Determine color based on adaptive thresholds
                         color = Fore.RESET
                         if delay > mean_delay + (std_dev * 2):
                             color = Fore.YELLOW
@@ -246,7 +246,7 @@ while True:
                 # Check if we have enough measurements
                 if len(times) >= repeat:
                     break
-        # -------------------- Кінець нового коду --------------------
+        # -------------------- End of new code --------------------
 
         # Store raw data before filtering
         delay_clear = delay_list
