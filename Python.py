@@ -1,5 +1,5 @@
 # Current version of the program
-ver = "1.3.0.0"
+ver = "1.3.0.8"
 
 # Required libraries import
 from colorama import Fore, Style
@@ -50,28 +50,6 @@ def filter_outliers(array):
 def generate_short_id(length=12):
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for _ in range(length))
-
-# Function to determine the maximum theoretical polling rate
-# based on the measured actual rate
-def get_polling_rate_max(actual_rate):
-    # Start with base rate
-    max_rate = 125
-    # Adjust max rate based on actual measurements
-    if actual_rate > 150:
-        max_rate = 250
-    if actual_rate > 320:
-        max_rate = 500
-    if actual_rate > 600:
-        max_rate = 1000
-    if actual_rate > 1200:
-        max_rate = 2000
-    if actual_rate > 2200:
-        max_rate = 4000
-    if actual_rate > 4200:
-        max_rate = 8000
-    if actual_rate > 8200:
-        max_rate = 10000
-    return max_rate
 
 # Main program loop
 while True:
@@ -175,8 +153,8 @@ while True:
         start_time = time.perf_counter_ns()
         prev_x, prev_y = None, None
         measurements_count = 0
-
-        # ---- New code for adaptive color output ----
+        
+        # New code for adaptive color output
         initial_measurements = []
         initial_measurements_count = 100  # Number of measurements to establish the threshold
         print("Collecting initial data for adaptation...")
@@ -206,7 +184,7 @@ while True:
         print(f"Initial standard deviation: {std_dev:.2f} ms")
         
         print("")  # Add empty line before measurements start
-
+        
         # Main measurement loop
         while True:
             # Get controller input
@@ -237,7 +215,7 @@ while True:
                         color = Fore.RESET
                         if delay > mean_delay + (std_dev * 2):
                             color = Fore.YELLOW
-                        if delay > mean_delay + (std_dev * 5) or delay > 10:
+                        if delay > mean_delay + (std_dev * 5):
                             color = Fore.RED
 
                         print(f"[{progress_percentage:3.0f}%] {color}{delay:.2f} ms{Style.RESET_ALL}")
@@ -246,36 +224,55 @@ while True:
                 # Check if we have enough measurements
                 if len(times) >= repeat:
                     break
-        # -------------------- End of new code --------------------
-
+        
         # Store raw data before filtering
         delay_clear = delay_list
         # Filter out statistical outliers
         delay_list = filter_outliers(delay_list)
 
-        # Calculate final statistics
+        # Calculate final statistics from the filtered data
         filteredMin = round(min(delay_list), 3)
         filteredMax = round(max(delay_list), 3)
         filteredAverage = round(np.mean(delay_list), 3)
-
-        # Calculate polling rate and stability
-        polling_rate = round(1000 / filteredAverage, 2)
         jitter = round(np.std(delay_list), 3)
+
+        # Calculate polling rate avg
+        polling_rate_avg = round(1000 / filteredAverage, 2)
+        
+        # New outlier calculation based on the full data set after filtering
+        outliers_list = []
+        outlier_threshold = filteredAverage + (jitter * 5)
+        for delay_val in delay_clear:
+            if delay_val > outlier_threshold:
+                outliers_list.append(delay_val)
+
 
         # Display results
         print("")
-        max_polling_rate = get_polling_rate_max(polling_rate)
-        print(f"Polling Rate Max.:  {max_polling_rate} Hz")
-        print(f"Polling Rate Avg.:  {polling_rate:.2f} Hz")
-        stability = round((polling_rate/max_polling_rate)*100, 2)
-        print(f"Stability:          {stability}%")
-
+        print(f"=== Polling Rate ===")
+        print(f"Average: {Fore.YELLOW}{Style.BRIGHT}{polling_rate_avg:.2f} Hz{Style.RESET_ALL}")
+        
         print(f" ")
         print(f"=== Refresh intervals ===")
         print(f"Minimal interval:   {filteredMin:.2f} ms")
-        print(f"Average interval:   {filteredAverage:.2f} ms")
+        print(f"Average interval:   {Fore.YELLOW}{Style.BRIGHT}{filteredAverage:.2f} ms{Style.RESET_ALL}")
         print(f"Maximum interval:   {filteredMax:.2f} ms")
         print(f"Jitter:             {jitter:.2f} ms")
+
+        # Outliers Report
+        print(f" ")
+        print(f"=== Outliers Report ===")
+        outliers_count = len(outliers_list)
+        print(f"Number of outliers: {outliers_count}")
+        if measurements_count > 0:
+            outliers_percentage = (outliers_count / measurements_count) * 100
+            print(f"Outliers percentage: {outliers_percentage:.2f}%")
+        if outliers_count > 0:
+            outliers_avg_delay = np.mean(outliers_list)
+            print(f"Average outlier delay: {Fore.YELLOW}{Style.BRIGHT}{outliers_avg_delay:.2f} ms{Style.RESET_ALL}")
+        else:
+            print("No significant outliers detected.")
+        # -----------------------------------------------------------
 
         # Generate unique test identifier
         test_key = generate_short_id()
@@ -291,7 +288,7 @@ while True:
             'min_latency': round(filteredMin, 2),
             'avg_latency': round(filteredAverage, 2),
             'max_latency': round(filteredMax, 2),
-            'polling_rate': polling_rate,
+            'polling_rate': polling_rate_avg,
             'jitter': round(jitter, 2),
             'mathod': 'GP',
             'delay_list': ', '.join([f"{x:.2f}" for x in delay_clear])
