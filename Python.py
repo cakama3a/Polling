@@ -1,5 +1,5 @@
 # Current version of the program
-ver = "1.3.0.8"
+ver = "1.3.1.1"
 
 # Required libraries import
 from colorama import Fore, Style
@@ -13,6 +13,7 @@ import webbrowser
 import random
 import string
 import pygame
+from requests.exceptions import RequestException
 
 print("Based on the method of: https://github.com/chrizonix/XInputTest")
 
@@ -155,9 +156,10 @@ while True:
         measurements_count = 0
         
         # New code for adaptive color output
+        print("Collecting initial data for adaptation...")
+        print(f"{Fore.YELLOW}Please rotate the stick smoothly to collect data for adaptive thresholds.{Style.RESET_ALL}")
         initial_measurements = []
         initial_measurements_count = 100  # Number of measurements to establish the threshold
-        print("Collecting initial data for adaptation...")
         
         while len(initial_measurements) < initial_measurements_count:
             pygame.event.pump()
@@ -180,10 +182,13 @@ while True:
         
         mean_delay = np.mean(initial_measurements)
         std_dev = np.std(initial_measurements)
+        print("Initial data collection complete.")
         print(f"Initial average delay: {mean_delay:.2f} ms")
         print(f"Initial standard deviation: {std_dev:.2f} ms")
         
         print("")  # Add empty line before measurements start
+        print(f"{Fore.YELLOW}Starting main test. Continue rotating the stick for accurate results.{Style.RESET_ALL}")
+
         
         # Main measurement loop
         while True:
@@ -298,7 +303,7 @@ while True:
         with open('data.txt', 'w') as outfile:
             json.dump(data, outfile, indent=4)
 
-        # Handle web result viewing
+        # Handle web result viewing with retry logic
         print("")
         if input("Would you like to see detailed test graphs on your personalized page at Gamepadla.com? (Y/N): ").lower() == "y":
             gamepad_name = input("Please enter the name of your gamepad: ")
@@ -313,18 +318,27 @@ while True:
                 print("Invalid choice. Defaulting to Cable.")
                 connection = "Unset"
 
-            # Add additional data for web display
             data['connection'] = connection
             data['name'] = gamepad_name
 
-            # Send results to server
-            response = requests.post('https://gamepadla.com/scripts/poster.php', data=data)
-            if response.status_code == 200:
-                print("Test results successfully sent to the server.")
-                webbrowser.open(f'https://gamepadla.com/result/{test_key}/')
-            else:
-                print("Failed to send test results to the server.")
-
+            sent_successfully = False
+            while not sent_successfully:
+                try:
+                    response = requests.post('https://gamepadla.com/scripts/poster.php', data=data)
+                    if response.status_code == 200:
+                        print("Test results successfully sent to the server.")
+                        webbrowser.open(f'https://gamepadla.com/result/{test_key}/')
+                        sent_successfully = True
+                    else:
+                        print("Failed to send test results to the server.")
+                        retry = input("Do you want to retry? (Y/N): ").lower()
+                        if retry != "y":
+                            break
+                except RequestException:
+                    print(f"{Fore.YELLOW}{Style.BRIGHT}Connection error. Data could not be sent.{Style.RESET_ALL}")
+                    retry = input("Do you want to retry? (Y/N): ").lower()
+                    if retry != "y":
+                        break
         # Cleanup unnecessary data
         del data['test_key']
         del data['os_version']
