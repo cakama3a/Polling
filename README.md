@@ -46,7 +46,7 @@ You can run the Python file after installing requirements with:
 python -m venv env
 source env/bin/activate
 pip install -r requirements.txt
-python Polling.py
+python Python.py
 ```
 
 ## Donation
