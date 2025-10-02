@@ -1,5 +1,5 @@
 # Current version of the program
-ver = "1.3.1.1"
+ver = "1.3.1.4"
 
 # Required libraries import
 from colorama import Fore, Style
@@ -33,7 +33,7 @@ print(f" ")
 pygame.init()
 
 # Function to filter out statistical outliers from the array
-# Used to remove extreme values that might skew the results
+# Used to remove extreme values that might skew the main results (average, jitter)
 def filter_outliers(array):
     # Set the quantile bounds for filtering
     lower_quantile = 0.02
@@ -155,104 +155,68 @@ while True:
         prev_x, prev_y = None, None
         measurements_count = 0
         
-        # New code for adaptive color output
-        print("Collecting initial data for adaptation...")
-        print(f"{Fore.YELLOW}Please rotate the stick smoothly to collect data for adaptive thresholds.{Style.RESET_ALL}")
-        initial_measurements = []
-        initial_measurements_count = 100  # Number of measurements to establish the threshold
+        print(f"\n{Fore.YELLOW}Starting test. Please rotate the selected stick smoothly.{Style.RESET_ALL}")
         
-        while len(initial_measurements) < initial_measurements_count:
-            pygame.event.pump()
-            x = joystick.get_axis(axis_x)
-            y = joystick.get_axis(axis_y)
-            pygame.event.clear()
-
-            if not ("0.0" in str(x) and "0.0" in str(y)):
-                if prev_x is None and prev_y is None:
-                    prev_x, prev_y = x, y
-                    prev_time = time.perf_counter_ns()
-                elif x != prev_x or y != prev_y:
-                    end_time = time.perf_counter_ns()
-                    delay = round((end_time - prev_time) / 1_000_000, 3)
-                    prev_time = end_time
-                    prev_x, prev_y = x, y
-
-                    if 0.1 < delay < 150:
-                        initial_measurements.append(delay)
-        
-        mean_delay = np.mean(initial_measurements)
-        std_dev = np.std(initial_measurements)
-        print("Initial data collection complete.")
-        print(f"Initial average delay: {mean_delay:.2f} ms")
-        print(f"Initial standard deviation: {std_dev:.2f} ms")
-        
-        print("")  # Add empty line before measurements start
-        print(f"{Fore.YELLOW}Starting main test. Continue rotating the stick for accurate results.{Style.RESET_ALL}")
-
-        
-        # Main measurement loop
+        # Main measurement loop - prints plain log in real-time
         while True:
-            # Get controller input
             pygame.event.pump()
             x = joystick.get_axis(axis_x)
             y = joystick.get_axis(axis_y)
             pygame.event.clear()
 
-            # Process stick movement
             if not ("0.0" in str(x) and "0.0" in str(y)):
                 if prev_x is None and prev_y is None:
                     prev_x, prev_y = x, y
                     prev_time = start_time
                 elif x != prev_x or y != prev_y:
-                    # Calculate delay between movements
                     end_time = time.perf_counter_ns()
                     delay = round((end_time - prev_time) / 1_000_000, 3)
                     prev_time = end_time
                     prev_x, prev_y = x, y
 
-                    # Record valid measurements
-                    if delay != 0.0 and delay > 0.1 and delay < 150:
+                    if delay > 0.1 and delay < 150:
                         times.append(delay)
                         measurements_count += 1
-                        progress_percentage = (measurements_count / repeat) * 100
-
-                        # Determine color based on adaptive thresholds
-                        color = Fore.RESET
-                        if delay > mean_delay + (std_dev * 2):
-                            color = Fore.YELLOW
-                        if delay > mean_delay + (std_dev * 5):
-                            color = Fore.RED
-
-                        print(f"[{progress_percentage:3.0f}%] {color}{delay:.2f} ms{Style.RESET_ALL}")
                         delay_list.append(delay)
+                        
+                        # --- Print plain, uncolored log in real-time ---
+                        progress_percentage = (measurements_count / repeat) * 100
+                        print(f"[{progress_percentage:3.0f}%] {delay:.2f} ms")
 
-                # Check if we have enough measurements
                 if len(times) >= repeat:
                     break
         
-        # Store raw data before filtering
+        print("\nAnalyzing results...")
+
         delay_clear = delay_list
-        # Filter out statistical outliers
-        delay_list = filter_outliers(delay_list)
+        delay_list_filtered = filter_outliers(delay_list)
 
-        # Calculate final statistics from the filtered data
-        filteredMin = round(min(delay_list), 3)
-        filteredMax = round(max(delay_list), 3)
-        filteredAverage = round(np.mean(delay_list), 3)
-        jitter = round(np.std(delay_list), 3)
+        filteredMin = round(min(delay_list_filtered), 3)
+        filteredMax = round(max(delay_list_filtered), 3)
+        filteredAverage = round(np.mean(delay_list_filtered), 3)
+        jitter = round(np.std(delay_list_filtered), 3)
 
-        # Calculate polling rate avg
         polling_rate_avg = round(1000 / filteredAverage, 2)
         
-        # New outlier calculation based on the full data set after filtering
-        outliers_list = []
-        outlier_threshold = filteredAverage + (jitter * 5)
-        for delay_val in delay_clear:
-            if delay_val > outlier_threshold:
-                outliers_list.append(delay_val)
+        q1 = np.percentile(delay_clear, 25)
+        q3 = np.percentile(delay_clear, 75)
+        iqr = q3 - q1
+        outlier_threshold = q3 + (1.5 * iqr)
+        outliers_list = [delay_val for delay_val in delay_clear if delay_val > outlier_threshold]
+        
+        # --- NEW: Re-painting the log with correct highlighting ---
+        # Move cursor up by the number of lines in the log
+        num_log_lines = len(delay_clear)
+        print(f"\x1b[{num_log_lines}A", end="")
 
+        for i, delay_val in enumerate(delay_clear):
+            progress_percentage = ((i + 1) / len(delay_clear)) * 100
+            color = Fore.RED if delay_val > outlier_threshold else Style.RESET_ALL
+            
+            # \x1b[2K clears the entire line before printing over it
+            print(f"\x1b[2K[{progress_percentage:3.0f}%] {color}{delay_val:.2f} ms{Style.RESET_ALL}")
+        # --- End of re-painting block ---
 
-        # Display results
         print("")
         print(f"=== Polling Rate ===")
         print(f"Average: {Fore.YELLOW}{Style.BRIGHT}{polling_rate_avg:.2f} Hz{Style.RESET_ALL}")
@@ -264,9 +228,8 @@ while True:
         print(f"Maximum interval:   {filteredMax:.2f} ms")
         print(f"Jitter:             {jitter:.2f} ms")
 
-        # Outliers Report
         print(f" ")
-        print(f"=== Outliers Report ===")
+        print(f"=== Outliers Report (based on IQR method) ===")
         outliers_count = len(outliers_list)
         print(f"Number of outliers: {outliers_count}")
         if measurements_count > 0:
@@ -277,11 +240,8 @@ while True:
             print(f"Average outlier delay: {Fore.YELLOW}{Style.BRIGHT}{outliers_avg_delay:.2f} ms{Style.RESET_ALL}")
         else:
             print("No significant outliers detected.")
-        # -----------------------------------------------------------
 
-        # Generate unique test identifier
         test_key = generate_short_id()
-        # Prepare data for storage and transmission
         data = {
             'test_key': str(test_key),
             'version': ver,
@@ -299,11 +259,9 @@ while True:
             'delay_list': ', '.join([f"{x:.2f}" for x in delay_clear])
         }
 
-        # Save results to file
         with open('data.txt', 'w') as outfile:
             json.dump(data, outfile, indent=4)
 
-        # Handle web result viewing with retry logic
         print("")
         if input("Would you like to see detailed test graphs on your personalized page at Gamepadla.com? (Y/N): ").lower() == "y":
             gamepad_name = input("Please enter the name of your gamepad: ")
@@ -339,11 +297,9 @@ while True:
                     retry = input("Do you want to retry? (Y/N): ").lower()
                     if retry != "y":
                         break
-        # Cleanup unnecessary data
         del data['test_key']
         del data['os_version']
         del data['url']
 
-        # Check if user wants to run another test
         if input("Run again? (Y/N): ").lower() != "y":
             break
