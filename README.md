@@ -5,6 +5,9 @@ Based on the method of Christian P.: https://github.com/chrizonix/XInputTest
 Pyhon code written by [John Punch](https://www.reddit.com/user/JohnnyPunch/)  
 Donation page: https://ko-fi.com/gamepadla  
 
+> [!IMPORTANT]
+> The new beta version of Polling 2 is available for download here: https://gamepadla.itch.io/polling
+
 ![image](https://github.com/user-attachments/assets/f319e1b8-317e-4d91-9cc1-7c50510c2b54)
 
 A website with a catalog of tested gamepads: https://gamepadla.com
